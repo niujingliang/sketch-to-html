@@ -43,8 +43,11 @@ module.exports = function (source, callback) {
             console.error(err);
             return;
         }
-        // 复制图片到结果文件夹
-        fse.copySync('./output/images', './output/html/images');
+
+        if(fs.existsSync('./output/images')) {
+            // 复制图片到结果文件夹
+            fse.copySync('./output/images', './output/html/images');
+        }
         // 复制模板资源文件夹
         fse.copySync('./template/assets', './output/html/assets');
         // 复制首页

@@ -3,6 +3,7 @@ const bplistParser = require('bplist-parser');
 const NSArchiveParser = require('./NSArchiveParser.js');
 const util = require('./../util.js');
 
+
 const styleParser = function (style, attributedString, layer) {
     let result = {};
     if (layer.fixedRadius) {
@@ -43,73 +44,120 @@ const styleParser = function (style, attributedString, layer) {
         });
     }
 
+    if(style.textStyle) {
+        let isEncodeMode = !!(attributedString && attributedString.archivedAttributedString);
+        // 加密模式
+        if(isEncodeMode) {
+            const decodedAttributedString = parseArchive(attributedString.archivedAttributedString._archive)
 
-    if (style.textStyle && attributedString && attributedString.archivedAttributedString) {
-        const decodedAttributedString = parseArchive(attributedString.archivedAttributedString._archive);
-        let encodedAttributes;
-        let decodedNSColor;
-        let decodedNSParagraphStyle;
-        let decodedMSAttributedStringFontAttribute;
-        if (style.textStyle.encodedAttributes) {
-            encodedAttributes = style.textStyle.encodedAttributes;
-            if (encodedAttributes.NSColor)
-                decodedNSColor = parseArchive(encodedAttributes.NSColor._archive);
-            if (encodedAttributes.NSParagraphStyle)
-                decodedNSParagraphStyle = parseArchive(encodedAttributes.NSParagraphStyle._archive);
-            if (encodedAttributes.MSAttributedStringFontAttribute)
-                decodedMSAttributedStringFontAttribute = parseArchive(encodedAttributes.MSAttributedStringFontAttribute._archive);
+            let encodedAttributes;
+            let decodedNSColor;
+            let decodedNSParagraphStyle;
+            let decodedMSAttributedStringFontAttribute;
 
-        }
-
-        if (decodedAttributedString.NSAttributes.NSColor && decodedAttributedString.NSAttributes.NSColor.NSRGB) {
-            const colorArray = decodedAttributedString.NSAttributes.NSColor.NSRGB.toString().split(' ');
-            const colors = {};
-            colors.red = parseFloat(colorArray[0]);
-            colors.green = parseFloat(colorArray[1]);
-            colors.blue = parseFloat(colorArray[2]);
-
-            if (colorArray.length > 3) {
-                colors.alpha = parseFloat(colorArray[3]);
+            if (style.textStyle.encodedAttributes) {
+                encodedAttributes = style.textStyle.encodedAttributes;
+                if (encodedAttributes.NSColor)
+                    decodedNSColor = parseArchive(encodedAttributes.NSColor._archive);
+                if (encodedAttributes.NSParagraphStyle)
+                    decodedNSParagraphStyle = parseArchive(encodedAttributes.NSParagraphStyle._archive);
+                if (encodedAttributes.MSAttributedStringFontAttribute)
+                    decodedMSAttributedStringFontAttribute = parseArchive(encodedAttributes.MSAttributedStringFontAttribute._archive);
             }
-            result.color = colorParser(colors);
-        } else {
-            result.color = result.color || '#000000';
-        }
 
-        if (decodedAttributedString.NSAttributes.MSAttributedStringFontAttribute) {
-            let fontAttr = decodedAttributedString.NSAttributes.MSAttributedStringFontAttribute.NSFontDescriptorAttributes;
-            result.fontSize = fontAttr.NSFontSizeAttribute;
-            if(fontAttr.NSFontNameAttribute){
-                result.fontFamily = fontAttr.NSFontNameAttribute;
-            }
-        }
-        if (decodedMSAttributedStringFontAttribute) {
-            result.fontSize = decodedMSAttributedStringFontAttribute.NSFontDescriptorAttributes.NSFontSizeAttribute;
-            if(decodedMSAttributedStringFontAttribute.NSFontDescriptorAttributes.NSFontNameAttribute){
-                result.fontFamily = decodedMSAttributedStringFontAttribute.NSFontDescriptorAttributes.NSFontNameAttribute;
-            }
-        }
-        if (decodedAttributedString.NSAttributes.NSKern ){
-            result.letterSpacing = decodedAttributedString.NSAttributes.NSKern;
-        }
-        if (encodedAttributes.NSKern ){
-            result.letterSpacing = encodedAttributes.NSKern;
-        }
-        if (decodedAttributedString.NSAttributes.NSParagraphStyle) {
-            const paragraphSpacing = decodedAttributedString.NSAttributes.NSParagraphStyle.NSParagraphSpacing;
-            const maxLineHeight = decodedAttributedString.NSAttributes.NSParagraphStyle.NSMaxLineHeight;
-            const minLineHeight = decodedAttributedString.NSAttributes.NSParagraphStyle.NSMinLineHeight;
-            if (decodedAttributedString.NSAttributes.NSParagraphStyle.NSAlignment) {
-                result.textAlign = decodedAttributedString.NSAttributes.NSParagraphStyle.NSAlignment;
+            if (decodedAttributedString.NSAttributes.NSColor && decodedAttributedString.NSAttributes.NSColor.NSRGB) {
+                const colorArray = decodedAttributedString.NSAttributes.NSColor.NSRGB.toString().split(' ');
+                const colors = {};
+                colors.red = parseFloat(colorArray[0]);
+                colors.green = parseFloat(colorArray[1]);
+                colors.blue = parseFloat(colorArray[2]);
+
+                if (colorArray.length > 3) {
+                    colors.alpha = parseFloat(colorArray[3]);
+                }
+                result.color = colorParser(colors);
             } else {
-                result.textAlign = 0;
+                result.color = result.color || '#000000';
             }
-            result.minLineHeight = minLineHeight;
-            result.maxLineHeight = maxLineHeight;
-            result.lineHeight = minLineHeight; //+ paragraphSpacing;
-            result.paragraphSpacing = paragraphSpacing;
+
+            if (decodedAttributedString.NSAttributes.MSAttributedStringFontAttribute) {
+                let fontAttr = decodedAttributedString.NSAttributes.MSAttributedStringFontAttribute.NSFontDescriptorAttributes;
+                result.fontSize = fontAttr.NSFontSizeAttribute;
+                if(fontAttr.NSFontNameAttribute){
+                    result.fontFamily = fontAttr.NSFontNameAttribute;
+                }
+            }
+            if (decodedMSAttributedStringFontAttribute) {
+                result.fontSize = decodedMSAttributedStringFontAttribute.NSFontDescriptorAttributes.NSFontSizeAttribute;
+                if(decodedMSAttributedStringFontAttribute.NSFontDescriptorAttributes.NSFontNameAttribute){
+                    result.fontFamily = decodedMSAttributedStringFontAttribute.NSFontDescriptorAttributes.NSFontNameAttribute;
+                }
+            }
+            if (decodedAttributedString.NSAttributes.NSKern ){
+                result.letterSpacing = decodedAttributedString.NSAttributes.NSKern;
+            }
+            if (encodedAttributes.NSKern){
+                result.letterSpacing = encodedAttributes.NSKern;
+            }
+            if (decodedAttributedString.NSAttributes.NSParagraphStyle) {
+                const paragraphSpacing = decodedAttributedString.NSAttributes.NSParagraphStyle.NSParagraphSpacing;
+                const maxLineHeight = decodedAttributedString.NSAttributes.NSParagraphStyle.NSMaxLineHeight;
+                const minLineHeight = decodedAttributedString.NSAttributes.NSParagraphStyle.NSMinLineHeight;
+                if (decodedAttributedString.NSAttributes.NSParagraphStyle.NSAlignment) {
+                    result.textAlign = decodedAttributedString.NSAttributes.NSParagraphStyle.NSAlignment;
+                } else {
+                    result.textAlign = 0;
+                }
+                result.minLineHeight = minLineHeight;
+                result.maxLineHeight = maxLineHeight;
+                result.lineHeight = minLineHeight; //+ paragraphSpacing;
+                result.paragraphSpacing = paragraphSpacing;
+            }
+            result.text = decodedAttributedString.NSString.split(/\n/g).join(`<div style="height:${util.px2rem(result.paragraphSpacing)}"></div>`);
+        } else {
+            // 加密模式
+            const decodedAttributedString = attributedString.attributes[0];
+            let encodedAttributes = style.textStyle.encodedAttributes;
+
+            // 字体颜色
+            result.color = encodedAttributes && colorParser(encodedAttributes.MSAttributedStringColorAttribute);
+            if (!result.color && decodedAttributedString.attributes.MSAttributedStringColorAttribute) {
+                result.color = colorParser(decodedAttributedString.attributes.MSAttributedStringColorAttribute);
+            }
+
+            // 字体样式和大小
+            result.fontSize = encodedAttributes && encodedAttributes.MSAttributedStringFontAttribute.attributes.size;
+            result.fontFamily = encodedAttributes && encodedAttributes.MSAttributedStringFontAttribute.attributes.name;
+            let MSAttributedStringFontAttribute = decodedAttributedString.attributes.MSAttributedStringFontAttribute;
+            if (MSAttributedStringFontAttribute) {
+                let fontAttr = MSAttributedStringFontAttribute.attributes;
+                result.fontSize = result.fontSize || fontAttr.size;
+                result.fontFamily = result.fontFamily || fontAttr.name;
+            }
+
+            result.letterSpacing = encodedAttributes.kerning
+            if (!result.letterSpacing && decodedAttributedString.attributes.kerning ){
+                result.letterSpacing = decodedAttributedString.attributes.kerning;
+            }
+
+            let paragraphStyle = encodedAttributes.paragraphStyle || decodedAttributedString.attributes.paragraphStyle;
+            if (paragraphStyle) {
+                const paragraphSpacing = paragraphStyle.paragraphSpacing;
+                const maxLineHeight = paragraphStyle.maximumLineHeight;
+                const minLineHeight = paragraphStyle.minimumLineHeight;
+                if (paragraphStyle.alignment) {
+                    result.textAlign = paragraphStyle.alignment;
+                } else {
+                    result.textAlign = 0;
+                }
+                result.minLineHeight = minLineHeight;
+                result.maxLineHeight = maxLineHeight;
+                result.lineHeight = minLineHeight; //+ paragraphSpacing;
+                result.paragraphSpacing = paragraphSpacing;
+            }
+            result.text = attributedString.string.split(/\n/g).join(`<div style="height:${util.px2rem(result.paragraphSpacing)}"></div>`);
+        
         }
-        result.text = decodedAttributedString.NSString.split(/\n/g).join(`<div style="height:${util.px2rem(result.paragraphSpacing)}"></div>`);
     }
     if (style.fills) {
         style.fills.forEach((fill) => {

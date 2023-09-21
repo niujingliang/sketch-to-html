@@ -57,10 +57,11 @@ var util = {
      * @returns {*}
      */
     isSqu: function (layer) {
-        if (layer.path.points.length !== 4) {
+        const points = layer.path ? layer.path.points : layer.points;
+        if (points.length !== 4) {
             return false;
         }
-        const rectPoints = layer.path.points.map(x => this.toPoint(x.point, layer));
+        const rectPoints = points.map(x => this.toPoint(x.point, layer));
         const isSquare = this.isSquare(rectPoints[0], rectPoints[1], rectPoints[2], rectPoints[3]);
         return isSquare;
     },
@@ -70,11 +71,12 @@ var util = {
      * @returns {boolean}
      */
     isCircle: function (layer) {
-        if (!layer.path.points || layer.path.points.length !== 4) {
+        const points = layer.path ? layer.path.points : layer.points;
+        if (!points || points.length !== 4) {
             return false;
         }
         const isSquare = this.isSqu( layer);
-        const hasCurveTo = layer.path.points.filter(x => x.hasCurveTo === true).length === 4;
+        const hasCurveTo = points.filter(x => x.hasCurveTo === true).length === 4;
         if (isSquare && hasCurveTo) {
             return true;
         }
@@ -86,14 +88,14 @@ var util = {
      * @returns {*}
      */
     isRect(layer) {
-        const path = layer.path;
-        if (path.points.length !== 4) {
+        const points = layer.path ? layer.path.points : layer.points
+        if (points.length !== 4) {
             return false;
         }
-        const rectPoints = path.points.map(x => this.toPoint(x.point, layer));
+        const rectPoints = points.map(x => this.toPoint(x.point, layer));
         if (rectPoints.length === 4) {
             const isRect = this.IsRectangleAnyOrder(rectPoints[0], rectPoints[1], rectPoints[2], rectPoints[3]);
-            const hasCurveTo = path.points.filter(x => x.hasCurveTo === true).length > 0;
+            const hasCurveTo = points.filter(x => x.hasCurveTo === true).length > 0;
             return isRect && !hasCurveTo;
         }
         return false;

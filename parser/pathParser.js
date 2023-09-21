@@ -1,31 +1,30 @@
 const pathParser = function (layer) {
-    if(!layer.path) {
+    const points = layer.path ? layer.path.points : layer.points;
+    const isClosed = layer.isClosed;
+
+    if(!points || !points.length) {
         return null;
     }
-    let path = layer.path;
-    if(!path.points || !path.points.length) {
-        return null;
-    }
-    let {x, y} = getXY(path.points[0].point,layer);
+    let {x, y} = getXY(points[0].point,layer);
     let ret = `M${toS(x)},${toS(y)}`;
-    let n = path['isClosed'] ? path.points.length + 1 : path.points.length;
+    let n = isClosed ? points.length + 1 : points.length;
     for (let i = 1; i < n; ++i) {
         let now = i;
-        if (now === path.points.length) {
+        if (now === points.length) {
             now = 0;
         }
         let prev = (i - 1);
-        let {x: x1, y: y1} = getXY(path.points[prev].curveFrom,layer);
-        let {x: x2, y: y2} = getXY(path.points[now].curveTo,layer);
-        let {x, y} = getXY(path.points[now].point,layer);
-        if (!path.points[now].hasCurveTo && !path.points[now].hasCurveFrom){
+        let {x: x1, y: y1} = getXY(points[prev].curveFrom,layer);
+        let {x: x2, y: y2} = getXY(points[now].curveTo,layer);
+        let {x, y} = getXY(points[now].point,layer);
+        if (!points[now].hasCurveTo && !points[now].hasCurveFrom){
             ret += `L${toS(x)},${toS(y)}`;
         }else {
             ret += `C${toS(x1)},${toS(y1)} ${toS(x2)},${toS(y2)} ${toS(x)},${toS(y)}`;
         }
     }
 
-    if (path['isClosed']) {
+    if (isClosed) {
         ret += 'Z';
     }
     return ret;

@@ -32,10 +32,11 @@ const handleItem = function (item) {
     if (item._class === 'oval') {
         result.isCircle = util.isCircle(item);
         if (result.isCircle) {
-            const p1 = util.toPoint(item.path.points[0].point, item);
-            const p2 = util.toPoint(item.path.points[1].point, item);
-            const p3 = util.toPoint(item.path.points[2].point, item);
-            const p4 = util.toPoint(item.path.points[3].point, item);
+            const points = item.path ? item.path.points : item.points;
+            const p1 = util.toPoint(points[0].point, item);
+            const p2 = util.toPoint(points[1].point, item);
+            const p3 = util.toPoint(points[2].point, item);
+            const p4 = util.toPoint(points[3].point, item);
             result.style.borderRadius = (p1.y - p3.y) / 2;
         }
     }

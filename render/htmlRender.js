@@ -6,7 +6,7 @@ const htmlRender = function (layer, parentLayer, imagePath = '') {
         return '';
     }
     if (layer.type == 'symbolInstance') {
-        layer.childrens = SymbolStore.get(layer.symbolID).childrens;
+        layer.childrens = SymbolStore.get(layer.symbolID)?.childrens;
     }
     let childString = '';
     if (layer.type === 'text') {
