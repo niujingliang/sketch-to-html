@@ -23,6 +23,7 @@ const styleParser = function (style, attributedString, layer) {
     }
 
     if (!style) return result;
+
     if (style.contextSettings) {
         result.opacity = style.contextSettings.opacity;
     }
@@ -38,9 +39,7 @@ const styleParser = function (style, attributedString, layer) {
                     result.borderStyle = 'solid';
                     result.borderPosition = _border.position;
                 }
-
             }
-
         });
     }
 
@@ -159,10 +158,10 @@ const styleParser = function (style, attributedString, layer) {
         
         }
     }
+
     if (style.fills) {
         style.fills.forEach((fill) => {
             if (fill.isEnabled) {
-
                 if (fill.image) {
                     result.backgroundImage = fill.image._ref;
                 }
@@ -221,9 +220,11 @@ const styleParser = function (style, attributedString, layer) {
             }
         });
     }
-    if (layer.backgroundColor && layer.hasBackgroundColor) {
+    
+    if (layer.hasBackgroundColor && layer.backgroundColor) {
         result.backgroundColor = colorParser(layer.backgroundColor);
     }
+
     if (style.shadows) {
         style.shadows.forEach((shadow) => {
             if (shadow.isEnabled) {
@@ -232,12 +233,13 @@ const styleParser = function (style, attributedString, layer) {
         });
     }
     return result;
+}
 
-};
 function parseArchive (base64String) {
     const buf2 = Buffer.from(base64String, 'base64');
     const obj = bplistParser.parseBuffer(buf2);
     const parser = new NSArchiveParser();
     return parser.parse(obj);
 }
+
 module.exports = styleParser;

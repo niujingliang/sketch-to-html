@@ -11,8 +11,10 @@ class ShapePathLayer extends LayerProtocol {
     getStyle () {
         let otherStyle = {
             color: this.layer.style.color,
-            'background-image': this.layer.style.backgroundImage ? `url(${path.join(this.imagePath, this.layer.style.backgroundImage)}.png)` : null,
-            'background-color': this.layer.style.backgroundColor,
+            'background-image': this.layer.style.backgroundImage
+                ? `url(${path.join(this.imagePath, this.layer.style.backgroundImage)}.png)`
+                : null,
+            // 'background-color': this.layer.style.backgroundColor,
             'background': this.layer.style.linearGradientString,
             'border-radius': util.px2rem(this.layer.style.borderRadius),
             'line-height': util.px2rem(this.layer.style.lineHeight) || 'normal',
@@ -44,7 +46,7 @@ class ShapePathLayer extends LayerProtocol {
             stroke: this.parentLayer.style.borderColor,
             width: util.px2rem(this.layer.frame.width),
             height: util.px2rem(this.layer.frame.height),
-            'stroke-width': this.parentLayer.style.borderWidth ? (this.parentLayer.style.borderWidth + 'px') : 1
+            'stroke-width': this.parentLayer.style.borderWidth ? (this.parentLayer.style.borderWidth + 'px') : 1,
         };
         let finalStyle;
         style = util.assign(pathStyle, style);

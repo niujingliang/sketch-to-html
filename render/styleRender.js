@@ -1,5 +1,4 @@
 const path = require('path');
-const StyleStore = require('../store/StyleStore');
 const Layer = require('../layer/LayerFactory');
 const SymbolStore = require('../store/SymbolStore');
 
@@ -7,12 +6,12 @@ const styleRender = function (layer, parentLayer, imagePath = '', selector = '')
     if (!layer.isVisible) {
         return '';
     }
+
     if (layer.type == 'symbolInstance') {
         layer.childrens = SymbolStore.get(layer.symbolID)?.childrens;
     }
     selector = selector + '.' + layer.name + ' ';
 
-    let style = {};
     let layerInstance = new Layer();
     layerInstance.layer = layer;
     layerInstance.parentLayer = parentLayer;
@@ -34,7 +33,6 @@ const styleRender = function (layer, parentLayer, imagePath = '', selector = '')
     layer.childrens && layer.childrens.forEach((child) => {
         styleRender(child, layer, imagePath, selector);
     });
-
 };
 
 module.exports = styleRender;
