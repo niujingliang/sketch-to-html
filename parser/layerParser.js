@@ -15,14 +15,16 @@ const rename = function (name) {
     }
     return nextName;
 };
-
 const parseElement = function (element, parentNode) {
     let vnode = {};
     vnode.id = element.do_objectID;
+    vnode.type = element._class;
     vnode.frame = element.frame || {};
-    vnode.style = styleParser(element.style, element.attributedString, element);
+    vnode.style = styleParser(element, vnode);
     vnode.path = pathParser(element);
     vnode.isVisible = element.isVisible;
+    vnode.isMask = !!element.hasClippingMask;
+    vnode.symbolID = element.symbolID;
     vnode.parentNode = parentNode;
 
     let name = element.name ? element.name : '未命名';
@@ -34,7 +36,6 @@ const parseElement = function (element, parentNode) {
     vnode.name = rename(name);
     nameStore.push(vnode.name);
 
-    vnode.type = element._class;
     if (element._class === 'oval') {
         vnode.isCircle = util.isCircle(element);
         if (vnode.isCircle) {
@@ -45,24 +46,17 @@ const parseElement = function (element, parentNode) {
             const p4 = util.toPoint(points[3].point, element);
             vnode.style.borderRadius = (p1.y - p3.y) / 2;
         }
-    }
-    vnode.isMask = !!element.hasClippingMask;
-    if (element._class === 'rectangle') {
+    } else if (element._class === 'rectangle') {
         vnode.isRect = util.isRect(element);
-    }
-    if (element._class === 'text') {
+    } else if (element._class === 'text') {
         vnode.text = vnode.style.text || element.name;
-    }
-    if (element._class === 'bitmap') {
+    } else if (element._class === 'bitmap') {
         vnode.image = element.image._ref + '.png';
-    }
-    if (element._class === 'artboard') {
+    } else if (element._class === 'artboard') {
         vnode.frame.x = null;
         vnode.frame.y = null;
     }
-    if (element.symbolID) {
-        vnode.symbolID = element.symbolID;
-    }
+
     return vnode;
 };
 
@@ -80,10 +74,6 @@ const layerParser = function (page, parentNode = null) {
     }
     if (element.type === 'symbolMaster') {
         SymbolStore.set(element.symbolID, element);
-    }
-    console.log(element.id);
-    if(element.id === '62807D14-CBF8-4BE8-BD05-D515EC8D036C') {
-        console.log(element);
     }
     return element;
 };

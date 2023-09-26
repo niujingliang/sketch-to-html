@@ -57,6 +57,7 @@ class CommonLayer extends LayerProtocol {
             'width': util.px2rem(width),
             'height': util.px2rem(height),
             'transform': this.layer.style.transform ? this.layer.style.transform.join(' ') : null,
+            'transform-origin': this.layer.style.transformOrigin,
             'box-shadow': this.layer.style.boxShadow,
             'background': this.layer.style.linearGradientString,
             'opacity': this.layer.style.opacity,

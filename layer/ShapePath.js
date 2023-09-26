@@ -15,7 +15,7 @@ class ShapePathLayer extends LayerProtocol {
                 ? `url(${path.join(this.imagePath, this.layer.style.backgroundImage)}.png)`
                 : null,
             // 'background-color': this.layer.style.backgroundColor,
-            'background': this.layer.style.linearGradientString,
+            // 'background': this.layer.style.linearGradientString,
             'border-radius': util.px2rem(this.layer.style.borderRadius),
             'line-height': util.px2rem(this.layer.style.lineHeight) || 'normal',
             'margin-top': util.px2rem(this.layer.style.marginTop),
@@ -36,13 +36,13 @@ class ShapePathLayer extends LayerProtocol {
             height: util.px2rem(height),
             'transform': this.layer.style.transform ? this.layer.style.transform.join(' ') : null,
             'box-shadow': this.layer.style.boxShadow,
-            'background': this.layer.style.linearGradientString,
+            // 'background': this.layer.style.linearGradientString,
             'opacity': this.layer.style.opacity
         };
         let style = Object.assign({}, frameStyle, otherStyle);
         // 要出 svg 的条件
         let pathStyle = {
-            fill: this.parentLayer.style.backgroundColor || 'none',
+            fill: this.layer.style.backgroundColor || this.parentLayer.style.backgroundColor || 'none',
             stroke: this.parentLayer.style.borderColor,
             width: util.px2rem(this.layer.frame.width),
             height: util.px2rem(this.layer.frame.height),
@@ -61,9 +61,12 @@ class ShapePathLayer extends LayerProtocol {
 
     getHtml () {
         let layer = this.layer;
+        let { fillGradient } = layer;
+        let gradientId = fillGradient && Object.keys(fillGradient)[0];
         return `
-<svg id="${layer.id}" version="1.1" xmlns="http://www.w3.org/2000/svg" class="${layer.name}" style="${util.getStyleString(layer.finalStyle)}"  >
-    <path d="${layer.path}" />
+<svg id="${layer.id}" version="1.1" xmlns="http://www.w3.org/2000/svg" class="${layer.name}" style="${util.getStyleString(layer.finalStyle)}">
+    ${ fillGradient ? `<defs>${fillGradient[gradientId]}</defs>` : '' }
+    <path d="${layer.path}" ${ fillGradient ? `fill="url(#${gradientId})"`: '' }/>
 </svg>`;
     }
 
@@ -72,7 +75,6 @@ class ShapePathLayer extends LayerProtocol {
 ShapePathLayer.isShapePath = function (layer, parentLayer) {
     return (layer.type === 'oval' && !layer.isCircle) ||
       (layer.type === 'rectangle' && !layer.isRect) ||
-      (layer.path && layer.type === 'shapePath') ||
-      (parentLayer && parentLayer.type == 'shapeGroup' && parentLayer.childrens.length > 1);
+      (layer.path && layer.type === 'shapePath');
 };
 module.exports = ShapePathLayer;

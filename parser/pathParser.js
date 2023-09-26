@@ -29,6 +29,7 @@ const pathParser = function (layer) {
     }
     return ret;
 }
+
 function toS(a){
     return Number(a).toFixed(6).replace(/\.?0+$/,'');
 }
@@ -37,10 +38,12 @@ function s2p(s) {
     let [x, y] = s.substr(1, s.length - 2).split(',').map(Number);
     return {x, y}
 }
+
 function getXY(s,layer) {
     let {x, y} = s2p(s);
     x = layer.frame.width * x;
     y = layer.frame.height * y;
     return {x, y}
 }
+
 module.exports = pathParser;

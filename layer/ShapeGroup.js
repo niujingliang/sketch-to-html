@@ -18,7 +18,7 @@ class ShapeGroupLayer extends LayerProtocol {
             'box-shadow': this.layer.style.boxShadow,
             // 'background-color': layer.style.backgroundColor,
             // 'background-image': layer.style.backgroundImage ? `url(${path.join(imagePath, layer.style.backgroundImage)}.png)` : null,
-            'background': this.layer.style.linearGradientString,
+            // 'background': this.layer.style.linearGradientString,
             'opacity': this.layer.style.opacity
         };
         if(this.layer.style.backgroundImage && this.layer.childrens.length == 1) {

@@ -4,7 +4,9 @@ const NSArchiveParser = require('./NSArchiveParser.js');
 const util = require('./../util.js');
 
 
-const styleParser = function (style, attributedString, layer) {
+const styleParser = function (layer = {}, vnode) {
+    let { style, attributedString } = layer;
+
     let result = {};
     if (layer.fixedRadius) {
         result.borderRadius = layer.fixedRadius;
@@ -20,6 +22,11 @@ const styleParser = function (style, attributedString, layer) {
     if (layer.rotation) {
         result.transform = result.transform || [];
         result.transform.push(`rotate(${-1 * layer.rotation}deg)`);
+    }
+    if(layer.scale) {
+        result.transform = result.transform || [];
+        result.transform.push(`scale(${layer.scale})`);
+        result.transformOrigin = '0 0';
     }
 
     if (!style) return result;
@@ -165,18 +172,21 @@ const styleParser = function (style, attributedString, layer) {
                 if (fill.image) {
                     result.backgroundImage = fill.image._ref;
                 }
+                // 0 填充纯色 1 线性填充 2 径向渐变
                 if (fill.fillType === 1 || fill.fillType === 2) {
                     const gradient = fill.gradient;
                     const linearGradient = {};
                     linearGradient.gradientType = gradient.gradientType;
-                    const from = util.toPoint(gradient.to);
+                    const _from = util.toPoint(gradient.to);
+                    const from = { ..._from };
                     from.x = from.x * layer.frame.width;
                     from.y = from.y * layer.frame.height;
-                    const to = util.toPoint(gradient.from);
+                    const _to = util.toPoint(gradient.from);
+                    const to = { ..._to };
                     to.x = to.x * layer.frame.width;
                     to.y = to.y * layer.frame.height;
                     linearGradient.stops = [];
-                    let angle = linearGradient.angle = Math.atan(to.x - from.x) / (to.y - from.y) * 180 / Math.PI;
+                    let angle = linearGradient.angle = to.y === from.y ? 0 : Math.atan(to.x - from.x) / (to.y - from.y) * 180 / Math.PI;
                     let gradientLength = layer.frame.height / Math.cos(angle);
                     gradient.stops.forEach((stop) => {
                         const hex = util.color(stop.color);
@@ -187,11 +197,11 @@ const styleParser = function (style, attributedString, layer) {
                         linearGradient.stops.push(s);
 
                     });
+
                     linearGradient.stops.reverse();
                     let beginLength = from.x * Math.sin(angle);
                     let endLength = beginLength + Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
 
-                    // console.log(from,to,gradientLength,beginLength,endLength,angle);
                     let beginStop = {
                         color: linearGradient.stops[0].color,
                         offset: beginLength / gradientLength
@@ -210,6 +220,12 @@ const styleParser = function (style, attributedString, layer) {
                     result.linearGradientString = `linear-gradient(${linearGradient.angle}deg, ${linearGradient.stops.map((s)=>{
                         return s.color + ' ' + (s.offset * 100) + '%';
                     }).join(',')})`;
+                    const gradientId = vnode.id.replace(/-/g, '');
+                    vnode.fillGradient = {
+                        [gradientId]: `<linearGradient id="${gradientId}" x1="${_from.x}" y1="${_from.y}" x2="${_to.x}" y2="${_to.y}">
+                        ${linearGradient.stops.map(stop => `<stop offset="${stop.offset * 100}%" stop-color="${stop.color}" />`).join('')}
+                    </linearGradient>`
+                    }
                 } else if (fill.fillType === 0) {
                     if (layer._class == 'text') {
                         result.color = colorParser(fill.color);
