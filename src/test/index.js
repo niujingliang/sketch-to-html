@@ -7,8 +7,10 @@ const template = require('../template');
 
 const resolve = (...args) => path.resolve(__dirname, ...args);
 
+const sketchDemoPath = resolve('./sketch');
+const pagePath = resolve(sketchDemoPath, './pages');
+
 const outputPath = resolve('../../output');
-const pagePath = resolve('../../output/pages');
 
 const files = fs.readdirSync(pagePath);
 const pages = files.map(file => require(resolve(pagePath, file)))
